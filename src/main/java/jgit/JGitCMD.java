@@ -1,6 +1,7 @@
 package jgit;
 
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.LsRemoteCommand;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.NoFilepatternException;
@@ -16,6 +17,7 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -23,12 +25,12 @@ import org.apache.log4j.Logger;
 /**
  * Created by annguyen on 10/14/16.
  */
-public class Command {
+public class JGitCMD {
 
-    final static Logger logger = Logger.getLogger(Command.class);
+    final static Logger logger = Logger.getLogger(JGitCMD.class);
 
     /*
-    * Repository - Read
+    * Repository
     * */
 
     public static Repository openRepository(String path, String repoName) {
@@ -48,12 +50,9 @@ public class Command {
         return openRepository(Constants.GIT_HOME_SAMPLE, repoName);
     }
 
-    /*
-    * Repository - Write
-    * */
-    public static Repository createRepository(String path, String repoName) {
+    public static Repository initRepository(String path, String repoName) {
         try {
-            Repository repository = FileRepositoryBuilder.create(new File(path + "/" + repoName, ".git"));
+            Repository repository = FileRepositoryBuilder.create(new File(path + repoName, ".git"));
             repository.create();
             logger.info(repoName + " created");
             return repository;
@@ -64,8 +63,23 @@ public class Command {
         }
     }
 
-    public static Repository createRepository(String repoName) {
-        return createRepository(Constants.GIT_HOME_SAMPLE, repoName);
+    public static Repository initRepository(String repoName) {
+        return initRepository(Constants.GIT_HOME_SAMPLE, repoName);
+    }
+
+    public static void listRepository(String REMOTE_URL) {
+        LsRemoteCommand lsRemoteCommand = Git.lsRemoteRepository();
+        try {
+            Collection<Ref> refs = lsRemoteCommand.setHeads(true)
+                    .setTags(true)
+                    .setRemote(REMOTE_URL)
+                    .call();
+            for (Ref ref : refs) {
+                logger.info("Ref: " + ref);
+            }
+        } catch (GitAPIException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -151,10 +165,10 @@ public class Command {
     }
 
     /*
-    * Commit - Read
+    * Commit
     * */
     public static RevCommit getCommitMessage(Repository repository) throws IOException {
-        Ref head = repository.findRef("refs/heads/master");
+        Ref head = repository.findRef(Constants.HEAD_MASTER);
         try (RevWalk walk = new RevWalk(repository)) {
             RevCommit commit = walk.parseCommit(head.getObjectId());
             walk.dispose();
@@ -166,9 +180,6 @@ public class Command {
         }
     }
 
-    /*
-    * Commit - Write
-    * */
     public static void commitFile(Repository repository, File file, String message) {
         try {
             Git git = new Git(repository);
@@ -199,7 +210,7 @@ public class Command {
 
 
     /*
-    * Branch - Read
+    * Branch
     * */
     public static List<Ref> listBranches(Repository repository) {
         Git git = new Git(repository);
@@ -213,13 +224,19 @@ public class Command {
 
     }
 
-    /*
-    * Branch - Write
-    * */
     public static void createBranch(Repository repository, String branchName) {
         Git git = new Git(repository);
         try {
             git.branchCreate().setName(branchName).call();
+        } catch (GitAPIException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void deleteBranch(Repository repository, String branchName) {
+        Git git = new Git(repository);
+        try {
+            git.branchDelete().setBranchNames(branchName).call();
         } catch (GitAPIException e) {
             e.printStackTrace();
         }

@@ -15,12 +15,12 @@ public class Main {
     final static Logger logger = Logger.getLogger(Main.class);
 
     public static void main(String[] args) throws IOException {
-//        jgit.Command.createRepository(String.valueOf(currentTimeMillis()));
-        Repository repoAT = Command.openRepository(Constants.GIT_HOME, "CI-0.1");
+//        jgit.JGitCMD.initRepository(String.valueOf(currentTimeMillis()));
+        Repository repoAT = JGitCMD.openRepository(Constants.GIT_HOME, "CI-0.1");
 
         File newFile = new File(Constants.GIT_HOME +  "hihi");
 
-        Status status = Command.getStatus(repoAT);
+        Status status = JGitCMD.getStatus(repoAT);
         String strStatus = "";
         if (!status.getAdded().isEmpty()) {
             strStatus += "Added: " + status.getAdded() + "\n";
@@ -39,12 +39,12 @@ public class Main {
         }
         logger.info(strStatus);
 
-        Command.getUserConfig(repoAT);
-        RevCommit revCommit = Command.getCommitMessage(repoAT);
+        JGitCMD.getUserConfig(repoAT);
+        RevCommit revCommit = JGitCMD.getCommitMessage(repoAT);
         logger.info("\nCommit-Message: " + revCommit.getFullMessage());
 
-//        jgit.Command.getUserConfig(jgit.Constants.REPOSITORIES_HOME + name);
-//        jgit.Command.getUserConfig("/data/github/tend-sell/sell-web-automated-tests/");
-//        jgit.Command.getCommitMessage("/data/github/tend-sell/sell-web-automated-tests/");
+//        jgit.JGitCMD.getUserConfig(jgit.Constants.REPOSITORIES_HOME + name);
+//        jgit.JGitCMD.getUserConfig("/data/github/tend-sell/sell-web-automated-tests/");
+//        jgit.JGitCMD.getCommitMessage("/data/github/tend-sell/sell-web-automated-tests/");
     }
 }
