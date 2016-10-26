@@ -7,4 +7,5 @@ public class Constants {
     public static final String GIT_HOME_SAMPLE = System.getProperty("user.dir") + "/git/";
     public static final String GIT_HOME = "/data/github/";
     public static final String HEAD_MASTER = "refs/heads/master";
+
 }

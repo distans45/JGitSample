@@ -1,6 +1,6 @@
-package jgit;
 
-import org.apache.log4j.Logger;
+import jgit.Constants;
+import jgit.JGitFunctions;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -11,16 +11,15 @@ import java.io.IOException;
 /**
  * Created by annguyen on 10/14/16.
  */
-public class Main {
-    final static Logger logger = Logger.getLogger(Main.class);
+public class Test {
 
     public static void main(String[] args) throws IOException {
-//        jgit.JGitCMD.initRepository(String.valueOf(currentTimeMillis()));
-        Repository repoAT = JGitCMD.openRepository(Constants.GIT_HOME, "CI-0.1");
+//        jgit.JGitFunctions.initRepository(String.valueOf(currentTimeMillis()));
+        Repository repoAT = JGitFunctions.accessRepository(Constants.GIT_HOME, "CI-0.1");
 
-        File newFile = new File(Constants.GIT_HOME +  "hihi");
+        File newFile = new File(Constants.GIT_HOME + "hihi");
 
-        Status status = JGitCMD.getStatus(repoAT);
+        Status status = JGitFunctions.getStatus(repoAT);
         String strStatus = "";
         if (!status.getAdded().isEmpty()) {
             strStatus += "Added: " + status.getAdded() + "\n";
@@ -37,14 +36,14 @@ public class Main {
         if (!status.getUntracked().isEmpty()) {
             strStatus += "Untracked: " + status.getUntracked() + "\n";
         }
-        logger.info(strStatus);
+        System.out.println(strStatus);
 
-        JGitCMD.getUserConfig(repoAT);
-        RevCommit revCommit = JGitCMD.getCommitMessage(repoAT);
-        logger.info("\nCommit-Message: " + revCommit.getFullMessage());
+        JGitFunctions.getUserConfig(repoAT);
+        RevCommit revCommit = JGitFunctions.getCommitMessage(repoAT);
+        System.out.println("\nCommit-Message: " + revCommit.getFullMessage());
 
-//        jgit.JGitCMD.getUserConfig(jgit.Constants.REPOSITORIES_HOME + name);
-//        jgit.JGitCMD.getUserConfig("/data/github/tend-sell/sell-web-automated-tests/");
-//        jgit.JGitCMD.getCommitMessage("/data/github/tend-sell/sell-web-automated-tests/");
+//        jgit.JGitFunctions.getUserConfig(jgit.Constants.REPOSITORIES_HOME + name);
+//        jgit.JGitFunctions.getUserConfig("/data/github/tend-sell/sell-web-automated-tests/");
+//        jgit.JGitFunctions.getCommitMessage("/data/github/tend-sell/sell-web-automated-tests/");
     }
 }

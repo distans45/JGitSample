@@ -1,8 +1,6 @@
 package jgit;
 
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.LsRemoteCommand;
-import org.eclipse.jgit.api.Status;
+import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.NoFilepatternException;
 import org.eclipse.jgit.errors.AmbiguousObjectException;
@@ -20,20 +18,19 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.eclipse.jgit.transport.CredentialsProvider;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 /**
  * Created by annguyen on 10/14/16.
  */
-public class JGitCMD {
-
-    final static Logger logger = Logger.getLogger(JGitCMD.class);
+public class JGitFunctions {
 
     /*
     * Repository
     * */
 
-    public static Repository openRepository(String path, String repoName) {
+    public static Repository accessRepository(String path, String repoName) {
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         try {
             File repo = new File(path + repoName + "/.git");
@@ -41,30 +38,34 @@ public class JGitCMD {
             return repository;
         } catch (IOException e) {
             e.printStackTrace();
-            logger.error(e.getMessage(), e);
             return null;
         }
     }
 
-    public static Repository openRepository(String repoName) {
-        return openRepository(Constants.GIT_HOME_SAMPLE, repoName);
-    }
-
-    public static Repository initRepository(String path, String repoName) {
+    public static boolean initRepository(String path, String repoName) {
         try {
-            Repository repository = FileRepositoryBuilder.create(new File(path + repoName, ".git"));
-            repository.create();
-            logger.info(repoName + " created");
-            return repository;
-        } catch (IOException e) {
+            File repo = new File(path + repoName + "/.git");
+            InitCommand initCmd = Git.init();
+            initCmd.setDirectory(repo);
+            return true;
+        } catch (Exception e) {
             e.printStackTrace();
-            logger.error(e.getMessage(), e);
-            return null;
+            System.out.println(e.getMessage());
         }
+        return false;
     }
 
-    public static Repository initRepository(String repoName) {
-        return initRepository(Constants.GIT_HOME_SAMPLE, repoName);
+    public static boolean clonePublicRepository(String REMOTE_URL, String path) {
+        File targetDir = new File(path);
+        CloneCommand cloneCommand = Git.cloneRepository();
+        try {
+            cloneCommand.setURI(REMOTE_URL).
+                    setDirectory(targetDir)
+                    .call();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public static void listRepository(String REMOTE_URL) {
@@ -75,7 +76,7 @@ public class JGitCMD {
                     .setRemote(REMOTE_URL)
                     .call();
             for (Ref ref : refs) {
-                logger.info("Ref: " + ref);
+                System.out.println("Ref: " + ref);
             }
         } catch (GitAPIException e) {
             e.printStackTrace();
@@ -92,7 +93,7 @@ public class JGitCMD {
             return log;
         } catch (GitAPIException e) {
             e.printStackTrace();
-            logger.error(e.getMessage(), e);
+            System.out.println(e.getMessage());
             return null;
         } catch (IOException e) {
             e.printStackTrace();
@@ -106,7 +107,7 @@ public class JGitCMD {
             return log;
         } catch (GitAPIException e) {
             e.printStackTrace();
-            logger.error(e.getMessage(), e);
+            System.out.println(e.getMessage());
             return null;
         }
     }
@@ -117,11 +118,11 @@ public class JGitCMD {
             return log;
         } catch (GitAPIException | IncorrectObjectTypeException | MissingObjectException | AmbiguousObjectException e) {
             e.printStackTrace();
-            logger.error(e.getMessage(), e);
+            System.out.println(e.getMessage());
             return null;
         } catch (IOException e) {
             e.printStackTrace();
-            logger.error(e.getMessage(), e);
+            System.out.println(e.getMessage());
             return null;
         }
     }
@@ -132,7 +133,7 @@ public class JGitCMD {
             return log;
         } catch (GitAPIException e) {
             e.printStackTrace();
-            logger.error(e.getMessage(), e);
+            System.out.println(e.getMessage());
             return null;
         }
     }
@@ -147,7 +148,7 @@ public class JGitCMD {
             String name = config.getString("user", "", "name");
             String email = config.getString("user", "", "email");
             String url = config.getString("remote", "origin", "url");
-            logger.info("User configuration is: " + name + " - " + email
+            System.out.println("User configuration is: " + name + " - " + email
                     + ". \\nFrom:" + url);
 
         }
@@ -159,10 +160,11 @@ public class JGitCMD {
             return status;
         } catch (GitAPIException e) {
             e.printStackTrace();
-            logger.error(e.getMessage(), e);
+            System.out.println(e.getMessage());
             return null;
         }
     }
+
 
     /*
     * Commit
@@ -175,7 +177,7 @@ public class JGitCMD {
             return commit;
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error(e.getMessage(), e);
+            System.out.println(e.getMessage());
             return null;
         }
     }
@@ -187,10 +189,10 @@ public class JGitCMD {
             git.commit().setMessage(message).call();
         } catch (NoFilepatternException e) {
             e.printStackTrace();
-            logger.error(e.getMessage(), e);
+            System.out.println(e.getMessage());
         } catch (GitAPIException e) {
             e.printStackTrace();
-            logger.error(e.getMessage(), e);
+            System.out.println(e.getMessage());
         }
     }
 
@@ -201,10 +203,10 @@ public class JGitCMD {
             git.commit().setMessage(message).call();
         } catch (NoFilepatternException e) {
             e.printStackTrace();
-            logger.error(e.getMessage(), e);
+            System.out.println(e.getMessage());
         } catch (GitAPIException e) {
             e.printStackTrace();
-            logger.error(e.getMessage(), e);
+            System.out.println(e.getMessage());
         }
     }
 
@@ -239,6 +241,39 @@ public class JGitCMD {
             git.branchDelete().setBranchNames(branchName).call();
         } catch (GitAPIException e) {
             e.printStackTrace();
+        }
+    }
+
+    public static boolean checkoutBranch(Repository repository, String branchName) {
+        Git git = new Git(repository);
+        try {
+            CheckoutCommand checkoutCmd = git.checkout();
+            Ref ref = checkoutCmd.setCreateBranch(true)
+                    .setName(branchName)
+                    .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK)
+                    .setStartPoint("origin/" + branchName)
+                    .call();
+            System.out.println(ref.getName());
+            return true;
+        } catch (GitAPIException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+
+    }
+
+    public static boolean pushToRemote(Repository repository, String REMOTE_URL) {
+
+        Git git = new Git(repository);
+        CredentialsProvider credentialsProvider = Credentials.credentialsProvider;
+        try {
+            PushCommand pushCmd = git.push();
+            pushCmd.setRemote(REMOTE_URL).setCredentialsProvider(credentialsProvider).call();
+            return true;
+        } catch (GitAPIException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 }
